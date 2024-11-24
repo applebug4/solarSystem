@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+
+<canvas id="solarSystemCanvas"></canvas>
+
+<script>
+
+var canvas, canvasContext;
+const FRAMES_PER_SECOND = 10;
+var solarSystem;
+
+window.onload = function() {
+
+canvas = document.getElementById('solarSystemCanvas');
+canvasContext = canvas.getContext('2d');
+canvas.width = window.innerWidth-20;
+canvas.height = window.innerHeight-20;
+
+solarSystem = createSolarSystem(100);
+
+solarSystem.numStars = Math.floor( Math.random() * 5) + solarSystem.numStars-5;
+
+setInterval(function() {
+      
+      updateAll();
+},1000/FRAMES_PER_SECOND);
+
+}
+
+function updateAll () {
+
+  drawAll(solarSystem);
+  //moveAll(solarSystem); 
+  getRandomColor();
+
+}
+
+function getRandomColor() {
+  var letters = '0123456789ABCDEF';
+  var color = '#';
+  for (var i = 0; i < 6; i++) {
+    color += letters[Math.floor(Math.random() * 16)];
+  }
+  return color;
+}
+
+function createSolarSystem(numStars){
+
+  var solarSystemObject = {
+   
+    numStars: 0,
+    sunRadius: 150,
+    stars: [],
+
+    numPlanets: 2,
+    planets: [],
+
+    setStars: function(numStars){
+  
+    this.numStars = numStars;
+
+   for(var i=0; i<this.numStars; i++){
+     this.stars[i] = createStar();
+   }
+
+  },
+  drawStars: function(){
+    
+    var str1 = "rgb(255, 255, 255,";
+    //var str3 = ")";
+
+    for(var i=0; i<this.numStars; i++){
+
+ if (this.stars[i].transparency >= 1){
+   this.stars[i].brightness = -.1;
+ }
+ if (this.stars[i].transparency <= 0.1){
+   this.stars[i].brightness = .1;
+ }
+ 
+ this.stars[i].transparency += this.stars[i].brightness;
+ 
+ colorCircle(this.stars[i].starX,this.stars[i].starY,this.stars[i].starRadius,str1.concat(this.stars[i].transparency));
+    }
+
+  },
+  
+  drawSun: function(){
+  
+    colorCircle(canvas.width/2,canvas.height/2, this.sunRadius,'yellow');
+  
+  },
+  
+  drawPlanets: function(){
+  
+    //console.log(this);
+  
+    for(var i=0; i<this.numPlanets; i++){
+ //console.log('allen',this.planets[i].planetspeedX);
+ if( this.planets[i].planetX <= this.planets[i].planetMinX || this.planets[i].planetX >= this.planets[i].planetMaxX){  
+    this.planets[i].planetSpeedX = -this.planets[i].planetSpeedX;
+this.planets[i].planetSpeedY = -this.planets[i].planetSpeedY; 
+ }
+ 
+ this.planets[i].planetX += this.planets[i].planetspeedX;
+ this.planets[i].planetY += this.planets[i].planetspeedY;
+ //console.log(this.planets[i].planetspeedX);
+ //this.planets[i].planetX += 1;
+ 
+      colorCircle(this.planets[i].planetX,this.planets[i].planetY, this.planets[i].planetRadius, this.planets[i].planetColor);
+ 
+    }
+  
+  },
+  
+  setPlanets: function(){
+
+   for(var i=0; i<this.numPlanets; i++){
+     this.planets[i] = createPlanet();
+   }
+
+  }
+  
+  };
+  
+  solarSystemObject.setStars(numStars);
+  solarSystemObject.setPlanets();
+  return solarSystemObject;
+  
+}
+
+function createPlanet(){
+
+  var planetObject = {
+  
+    planetX: Math.floor(Math.random() * 300) + 100,
+    planetY: Math.floor(Math.random() * 300) + 100,
+planetMinX: 0,
+planetMinY: 0,
+planetMaxX: 0,
+planetMaxY: 0,
+    planetRadius: Math.floor(Math.random() * 25 ) + 10,
+planetSpeedX: 0,
+planetSpeedY: 0,
+
+  };
+
+  //console.log(planetObject);
+  
+  planetObject.planetMaxX = canvas.width - planetObject.planetX;
+  planetObject.planetMaxY = Math.abs(canvas.height - planetObject.planetY);
+  planetObject.planetMinX = planetObject.planetX;
+  planetObject.planetMinY = planetObject.planetY;
+  
+  var diffX = Math.abs(planetObject.planetMaxX - planetObject.planetX);
+  var diffY = Math.abs(planetObject.planetMaxY - planetObject.planetY);
+  var speed = Math.random()/10;
+  console.log(diffX,diffY,speed);
+  
+  planetObject.planetSpeedX = (speed * diffX)/100;
+  planetObject.planetSpeedY = (speed * diffY)/100;
+  console.log('allen',planetObject.planetSpeedX,planetObject.planetSpeedY);
+  console.log(planetObject);
+
+  return planetObject;    
+
+}
+
+function createStar(){
+
+  var starObject = {
+  
+    starX: Math.floor(Math.random() * window.innerWidth-20),
+    starY: Math.floor(Math.random() * window.innerHeight-20),
+    starRadius: Math.floor( Math.random() * 3 ) + 1,
+    transparency: Math.random(),
+brightness: .1
+
+  };
+
+  return starObject;    
+  
+}
+
+function colorCircle(centerX, centerY, radius, drawColor) {
+
+    canvasContext.fillStyle = drawColor;
+    canvasContext.beginPath();
+    canvasContext.arc(centerX, centerY, radius, 0, Math.PI * 2, true);
+    canvasContext.fill();
+}
+
+function drawAll(solarSystem) {
+
+  canvasContext.fillStyle = 'black';
+  canvasContext.fillRect(0,0,canvas.width,canvas.height);
+
+  solarSystem.drawStars();  
+  solarSystem.drawSun();
+  solarSystem.drawPlanets();
+
+}
+
+function moveAll(solarSystem) {
+
+//solarSystem.twinkleStars(); 
+
+}
+
+</script>
+
+</html>   
